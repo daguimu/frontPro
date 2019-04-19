@@ -24,58 +24,64 @@
         width: 500px;
         height: 800px;
     }
+
+    .cor {
+        background-color: cornsilk;
+    }
+
+    .head {
+        background-color: gray;
+    }
 </style>
 <div class="page-header">
     <h1 style="text-align:center;color:green">在线文本转换工具</h1>
     <input id="hide" type="hidden"/>
 </div>
-<div class="row vertical-middle">
-    <div class="col-md-5 col-lg-5">
-        <div class="panel  panel-primary">
-            <div class="panel-body">
-                <textarea id="from" style="font-size:19px; " rows="50" class="form-control"
+<div class="container-fluid">
+    <div class="row-fluid">
+        <div class="col-md-5 col-lg-5">
+            <div class="panel  panel-primary">
+                <div class="panel-body">
+                <textarea id="from" style="font-size:19px; " rows="38" class="cor form-control"
                           placeholder="Src content"></textarea>
+                </div>
             </div>
         </div>
-    </div>
-
-    <div class="col-md-1 col-lg-1 text-center" style="line-height: 500px;">
-        <div class="btn-group-vertical">
-            <input class="btn btn-primary real" type="button" value="to yaml&gt;&gt;" placeholder="yml">
-            <input class="btn btn-primary real" style="margin-top: 10px;" type="button" value="&lt;&lt;to prop"
-                   placeholder="pro">
-            <input class="btn btn-primary real" style="margin-top: 10px;" type="button" value="to sql&gt;&gt;"
-                   placeholder="sql">
+        <div class="col-md-2 col-lg-2 btn-group-vertical">
+            <button class=" btn btn-success real" style="margin-top: 450px;" type="button" value="sql">&gt;&gt;To Sql</button>
+            <button class="btn btn-warning real" style="margin-top: 10px;" type="button" value="yml">&gt;&gt;To Yaml
+            </button>
+            <button class="btn btn-info real" style="margin-top: 10px;" type="button" value="pro">&lt;&lt;To Prop
+            </button>
         </div>
-    </div>
+        <div class="col-md-5 col-lg-5">
 
-    <div class="col-md-5 col-lg-5">
-        <div class="panel  panel-primary">
-            <div class="panel-body">
-                <textarea id="to" style="font-size:19px; " rows="50" class="form-control"
+            <div class="panel  panel-primary">
+                <div class="panel-body">
+                <textarea id="to" style="font-size:19px; " rows="38" class="cor form-control"
                           placeholder="Target content"></textarea>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
 <div class="modal fade" id="loadingModal">
     <div style="width: 200px;height:20px; z-index: 20000; position: absolute; text-align: center; left: 50%; top: 50%;margin-left:-100px;margin-top:-10px">
         <div class="progress progress-striped active" style="margin-bottom: 0;">
             <div class="progress-bar" style="width: 100%;"></div>
         </div>
-
     </div>
 </div>
 <footer>
     <div class="row">
-        <div class="col-md-11 col-lg-11 text-center">
-            <div class="fixed"><a href="http://www.miitbeian.gov.cn/">京ICP备18020480号-1</a>
+        <div class="col-md-12 col-lg-12 text-center">
+            <div class="fixed"><a href="http://www.miitbeian.gov.cn/">京ICP备18020480号-1 </a>
                 <br>
-                Copyright ©2018 airi.net.com, All Rights Reserved
+                Copyright ©2018, TOYAML.COM, All Rights Reserved
                 <br>
                 E-Mail:<code>1712066621@qq.com</code>
             </div>
-
         </div>
     </div>
 </footer>
@@ -83,13 +89,36 @@
 
 
 <script type="text/javascript">
+    $("textarea").keydown(function (e) {
+        if (e.keyCode === 9) { // tab was pressed
+            // get caret position/selection
+            var start = this.selectionStart;
+            var end = this.selectionEnd;
+
+            var $this = $(this);
+            var value = $this.val();
+
+            // set textarea value to: text before caret + tab + text after caret
+            $this.val(value.substring(0, start)
+                + "\t"
+                + value.substring(end));
+
+            // put caret at right position again (add one for the tab)
+            this.selectionStart = this.selectionEnd = start + 1;
+
+            // prevent the focus lose
+            e.preventDefault();
+        }
+    });
+
+
     $(".real").click(function () {
         $("#loadingModal").modal('show');
         var path_map = {};
         path_map['sql'] = "tos";
         path_map['yml'] = "ty";
         path_map['pro'] = "tp";
-        var key = this.placeholder;
+        var key = this.value;
         post(createdata(key), path_map[key], key, function (data) {
             resultFun(data);
         })
@@ -112,6 +141,7 @@
     }
 
     function create(index, data) {
+        data = data.replace(/\t/g, " ");
         var map = {};
         map['pro'] = {"yml": data};
         map['yml'] = {"pro": data};
