@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta property="og:image" content="http://ww1.sinaimg.cn/large/0068un9lly1gdl6kpii7yj3048048mxe.jpg?where=super" />
+    <link rel="apple-touch-icon" href="http://ww1.sinaimg.cn/large/0068un9lly1gdl6kpii7yj3048048mxe.jpg">
+    <meta name="description" content="Guimu's app description" />
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>在线文本工具</title>
+    <link rel="stylesheet" href="static/bootstrap.min.css">
+    <!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+    <script src="static/jquery.min.js"></script>
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="static/bootstrap.min.js"></script>
+</head>
+<style>
+    .left {
+        margin-left: 10px;
+        float: left;
+        width: 500px;
+        height: 800px;
+    }
+
+    .right {
+        margin-right: 10px;
+        width: 500px;
+        height: 800px;
+    }
+
+    .cor {
+        background-color: cornsilk;
+    }
+
+    .head {
+        background-color: gray;
+    }
+
+</style>
+<!--<form id="upload" enctype="multipart/form-data" method="post">-->
+<!--    <input type="file" name="file" id="pic"/>-->
+<!--    <input type="button" value="开始上传" onclick="uploadPic();"/>-->
+<!--    <span class="showUrl"></span>-->
+<!--    <img src="" class="showPic" alt="">-->
+<!--</form>-->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title" id="myModalLabel">
+                    错误提示
+                </h4>
+            </div>
+            <div class="modal-body" id="error">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">
+                    关闭
+                </button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+<div class="page-header">
+    <h3 style="text-align:center;color:green">在线文本转换工具</h3>
+    <input id="hide" type="hidden"/>
+</div>
+<div class="container-fluid">
+    <div class="row-fluid">
+        <div class="col-md-5 col-lg-5">
+            <div class="panel  panel-primary">
+                <div class="panel-body">
+                <textarea id="from" style="font-size:19px; " rows="24" class="cor form-control"
+                          placeholder="Src content"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2 col-lg-2 btn-group-vertical">
+            <div>
+                <h3 style="text-align:center;color:gray">通知</h3>
+                <textarea style="background-color: gainsboro;text-align:center" id="notify" rows="8"
+                          class="form-control" readonly>
+                </textarea>
+            </div>
+            <button class="btn btn-primary dwz" style="margin-top: 180px;" type="button" value="add">&gt;&gt;To 生成短网址
+            </button>
+            <button class="btn btn-danger dwz" style="margin-top: 10px;" type="button" value="restore">&lt;&lt;To 还原短网址
+            </button>
+            <button class=" btn btn-success real" style="margin-top: 10px;" type="button" value="tos">&gt;&gt;Sql 转换
+            </button>
+        </div>
+        <div class="col-md-5 col-lg-5">
+
+            <div class="panel  panel-primary">
+                <div class="panel-body">
+                <textarea id="to" style="font-size:19px; " rows="24" class="cor form-control"
+                          placeholder="Target content"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="loadingModal">
+    <div style="width: 200px;height:20px; z-index: 20000; position: absolute; text-align: center; left: 50%; top: 50%;margin-left:-100px;margin-top:-10px">
+        <div class="progress progress-striped active" style="margin-bottom: 0;">
+            <div class="progress-bar" style="width: 100%;"><p>处理中</p>/div>
+            </div>
+        </div>
+    </div>
+</div>
+<footer>
+    <div class="row">
+        <div class="col-md-12 col-lg-12 text-center">
+            <div class="fixed"><a href="#">京ICP备18020480号-1 </a>
+                <br>
+                Copyright ©2018, TOYAML.COM, All Rights Reserved
+                <br>
+                E-Mail:<code>1712066621@qq.com</code>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+<script type="text/javascript">
+    sse();
+    $("textarea").keydown(function (e) {
+        if (e.keyCode === 9) { // tab was pressed
+            // get caret position/selection
+            let start = this.selectionStart;
+            let end = this.selectionEnd;
+
+            let $this = $(this);
+            let value = $this.val();
+
+            // set textarea value to: text before caret + tab + text after caret
+            $this.val(value.substring(0, start)
+                + "\t"
+                + value.substring(end));
+
+            // put caret at right position again (add one for the tab)
+            this.selectionStart = this.selectionEnd = start + 1;
+
+            // prevent the focus lose
+            e.preventDefault();
+        }
+    });
+
+
+    $(".real").click(function () {
+        $("#loadingModal").modal('show');
+        let url = "https://dagm.com/way/aplx/" + this.value;
+        post(url, createdata(this.value), function (data) {
+            resultFun(data);
+        })
+    });
+
+    $(".dwz").click(function () {
+        $("#loadingModal").modal('show');
+        let tem = this.value;
+        if ("restore" == this.value) {
+            tem = "pro";
+        }
+        jsonPost(createdata(tem), this.value, function (data) {
+            resultFun(data);
+        })
+    });
+
+
+    function post(url, data, succfun) {
+        $.ajax({
+            type: "POST",
+            contentType: 'application/x-www-form-urlencoded',
+            url: url,
+            data: create(data),
+            success: function (backda) {
+                $('#loadingModal').modal('hide');
+                succfun(backda);
+            }
+        });
+    }
+
+    function jsonPost(data, path, succfun) {
+        $.ajax({
+            type: "POST",
+            url: "https://dagm.com/way/shorter/inner/" + path,
+            data: JSON.stringify({"url": data}),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (backda) {
+                $('#loadingModal').modal('hide');
+                succfun(backda);
+            }
+        });
+    }
+
+    function create(data) {
+        data = data.replace(/\t/g, " ");
+        return {"sql": data};
+    }
+
+    function createdata(id) {
+        if (id == "pro") {
+            $("#hide").val("from");
+            return $("#to").val();
+        } else {
+            $("#hide").val("to");
+            return $("#from").val();
+        }
+    }
+
+    function resultFun(data) {
+        let id = $("#hide").val();
+        if (data.success) {
+            $("#" + id).val(data.data);
+        } else {
+            let start = data.msg.indexOf("错误信息:");
+            let errmsg = start > 0 ? data.msg.slice(start + 5, -2) : data.msg;
+            $("#error").text(errmsg);
+            $("#myModal").modal("show");
+        }
+    }
+
+
+    function uploadPic() {
+        let domain = "https://dagm.com/way/aplx";
+        let form = document.getElementById('upload'),
+            formData = new FormData(form);
+        $("#loadingModal").modal('show');
+        $.ajax({
+            url: domain + "/upFile",
+            type: "post",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (res) {
+                if (res) {
+                    $('#loadingModal').modal('hide');
+                    alert("上传成功！");
+                    if (true == res.success && res.data != undefined && confirm("确认是否下载文件?")) {
+                        let url = domain + "/dlp/" + res.data;
+                        window.open(url);
+                    }
+                }
+                console.log(res);
+            },
+            error: function (err) {
+                alert("网络连接失败,稍后重试", err);
+            }
+        })
+    }
+
+    function generateUUID() {
+        let d = new Date().getTime();
+        if (window.performance && typeof window.performance.now === "function") {
+            d += performance.now(); //use high-precision timer if available
+        }
+        let uuid = 'xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            let r = (d + Math.random() * 16) % 16 | 0;
+            d = Math.floor(d / 16);
+            return (c == 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+        });
+        return uuid;
+    }
+
+    function getCookie(c_name) {
+        if (document.cookie.length > 0) {
+            let c_start = document.cookie.indexOf(c_name + "=");//获取字符串的起点
+            if (c_start != -1) {
+                c_start = c_start + c_name.length + 1;//获取值的起点
+                let c_end = document.cookie.indexOf(";", c_start);//获取结尾处
+                if (c_end == -1) c_end = document.cookie.length;//如果是最后一个，结尾就是cookie字符串的结尾
+                return decodeURI(document.cookie.substring(c_start, c_end));//截取字符串返回
+            }
+        }
+        return "";
+    }
+
+    function setCookie(c_name, value, expiredays) {
+        var exdate = new Date();
+        exdate.setTime(Number(exdate) + expiredays);
+        document.cookie = c_name + "=" + escape(value) + ((expiredays == null) ? "" : ";expires=" + exdate.toGMTString());
+    }
+
+    function sse() {
+        // let s = "";
+        if (!!window.EventSource) {
+            let uuid = getCookie("uuid");
+            if (uuid == "") {
+                uuid = generateUUID();
+                setCookie("uuid", uuid);
+            }
+            let source = new EventSource('https://dagm.com/way/aplx/push/' + uuid);
+            /* open事件回调函数 */
+            source.onopen = evt => {
+                //$("#notify").html("SSE通道已建立...<br/>");
+            };
+            source.onmessage = ev => {
+                $("#notify").html(ev.data.slice(5));
+            }
+
+            /* error事件回调函数 */
+            source.onerror = evt => {
+                if (evt.target.readyState == EventSource.CLOSED) {
+                    $("#notify").html("SSE通道发生错误...");
+                }
+            }
+            // 自定义响应事件 complete，主动关闭EventSource
+            source.addEventListener('complete', function (e) {
+                console.log("数据接收完毕，关闭EventSource");
+                source.close();
+                console.log(e);
+            }, false);
+        } else {
+            console.log("你的浏览器不支持SSE");
+        }
+    }
+</script>
+</body>
+</html>
+
+
+
+
