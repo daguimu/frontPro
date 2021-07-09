@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="app">
+    {{message}}
+    <div :id="message">
+    </div>
+    <todo-list>
+        <todo-item @dele="deleMe" v-for="item in list" :title="item.title" :del="item.del">
+            <template v-slot:pre="{value}">
+                <span>前置图标{{value}}</span>
+            </template>
+            <!--            2.5 及其之前的自定义卡槽语法-->
+            <span slot="mid">中间图标</span>
+            <!--            2.6 之后的自定义卡槽语法-->
+                        <template v-slot:suf>
+                            <span>后置图标</span>
+                        </template>
+        </todo-item>
+    </todo-list>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+<script>
+    Vue.component('todo-item', {
+        props: {
+            title: String,
+            del: {
+                type: Boolean,
+                default: true,
+            }
+        },
+        template: `
+          <li>
+          <slot name="pre" :value="value"></slot>
+          <span v-if="!del" @click.stop="delMe">{{ title }}</span>
+          <span v-else style="text-decoration: line-through">{{ title }}</span>
+          <slot name="mid"></slot>
+          <slot name="suf">😄</slot>
+          </li>`
+        ,
+        data: function () {
+            return {
+                value: Math.random()
+            }
+        },
+        methods: {
+            delMe: function () {
+                console.log("click and invoke delMe method");
+                this.$emit("dele", this.title);
+            }
+        },
+    })
+    Vue.component('todo-list', {
+        template: `
+          <ul>
+          <slot></slot>
+          </ul>`,
+        data: function () {
+            return {
+                list: [
+                    {
+                        title: "课程1",
+                        del: false
+                    }, {
+                        title: "课程2",
+                    }
+                ]
+            };
+        },
+    })
+
+
+    var vm = new Vue({
+        el: "#app",
+        data: {
+            message: 'Hello World',
+            list: [
+                {
+                    title: "课程1",
+                    del: false
+                }, {
+                    title: "课程2",
+                }
+            ]
+        },
+        methods: {
+            deleMe: function (val) {
+                console.log("invoke deleMe", val)
+            }
+        }
+    })
+</script>
+</body>
+</html>
