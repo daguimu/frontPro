@@ -95,7 +95,7 @@ function copyClick() {
 
 function imgBed() {
     // 点击了上传图片按钮,进行img url 设置
-    let IMG_URL = "https://sec.dagm.com/G2P4";
+    let IMG_URL = "https://tu.dagm.com/G2P4";
     $("#uploadPlaceHolder").attr("src", IMG_URL);
     if (!$("#copy").hasClass("disabled")) {
         $("#copy").addClass("disabled");
