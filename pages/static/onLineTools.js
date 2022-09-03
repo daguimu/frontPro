@@ -68,7 +68,7 @@ const dropHandler = function (e) {
     uploadPic(formData);
 };
 
-function notImg(){
+function notImg() {
     $("#error").text("请选择一张图片!");
     $("#imgModal").modal('hide');
     // 用法
@@ -87,7 +87,7 @@ oDragWrap.addEventListener(
     true
 );
 
-function sleep (time) {
+function sleep(time) {
     return new Promise((resolve) => setTimeout(resolve, time));
 }
 
@@ -120,9 +120,15 @@ function imgBed() {
 }
 
 function uploadPicNoData() {
-    let form = document.getElementById('upload'),
-        formData = new FormData(form);
-    preview(formData.get("file"));
+    let form = document.getElementById('upload');
+    let formData = new FormData(form);
+    const file = formData.get("file");
+    //检测文件是不是图片
+    if (file.type.indexOf("image") === -1) {
+        notImg();
+        return;
+    }
+    preview(file);
     uploadPic(formData);
 }
 
