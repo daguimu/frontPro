@@ -56,6 +56,7 @@ const dropHandler = function (e) {
 
     //检测文件是不是图片
     if (fileList[0].type.indexOf("image") === -1) {
+        notImg();
         return;
     }
     //实例化file reader对象
@@ -66,6 +67,17 @@ const dropHandler = function (e) {
     formData.append("file", file);
     uploadPic(formData);
 };
+
+function notImg(){
+    $("#error").text("请选择一张图片!");
+    $("#imgModal").modal('hide');
+    // 用法
+    sleep(300).then(() => {
+        // 这里写sleep之后需要去做的事情
+        $("#myModal").modal("show");
+    })
+}
+
 //扔
 oDragWrap.addEventListener(
     "drop",
@@ -75,6 +87,9 @@ oDragWrap.addEventListener(
     true
 );
 
+function sleep (time) {
+    return new Promise((resolve) => setTimeout(resolve, time));
+}
 
 function preview(file) {
     const reader = new FileReader();
