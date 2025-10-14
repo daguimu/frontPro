@@ -133,10 +133,10 @@ function uploadPicNoData() {
 }
 
 function uploadPic(sendData) {
-    let domain = "https://dagm.com/way/aplx";
+    let domain = "https://img.dagm.com/img/";
     $("#loadingModal").modal('show');
     $.ajax({
-        url: domain + "/upPic",
+        url: domain + "/upload",
         type: "post",
         data: sendData,
         processData: false,

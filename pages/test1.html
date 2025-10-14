@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta property="og:image" content="http://ww1.sinaimg.cn/large/0068un9lly1gdl6kpii7yj3048048mxe.jpg?where=super"/>
+    <link rel="apple-touch-icon" href="http://ww1.sinaimg.cn/large/0068un9lly1gdl6kpii7yj3048048mxe.jpg">
+    <meta name="description" content="Guimu's app description"/>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Tools</title>
+    <link rel="stylesheet" href="static/bootstrap.min.css">
+    <link rel="stylesheet" href="static/loaders.min.css">
+    <link rel="stylesheet" href="static/popup.css">
+    <script src="static/jquery.min.js"></script>
+    <script src="static/bootstrap.min.js"></script>
+    <style>
+        body {
+            background-image: url('https://tu.dagm.com/T0P7');
+            background-size: cover;
+            background-repeat: no-repeat;
+            opacity: 1;
+            color: #333;
+        }
+
+        .panel-primary {
+            border-color: #007BFF;
+        }
+
+        .panel-primary > .panel-heading {
+            background-color: #007BFF;
+            border-color: #007BFF;
+        }
+
+        .modal-header {
+            background-color: #f7f7f7;
+            color: #007BFF;
+            border-bottom: 2px solid #007BFF;
+        }
+
+        .modal-title {
+            font-size: 1.2rem;
+        }
+
+        .btn-primary, .btn-success, .btn-info, .btn-danger {
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            color: #28a745;
+        }
+
+        .form-control {
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .page-header {
+            background-color: rgba(255, 255, 255, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        textarea {
+            background-color: rgba(255, 255, 255, 0.8);
+            border: 1px solid #ccc;
+        }
+
+        .modal-dialog {
+            max-width: 600px;
+        }
+
+        footer {
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 0.9rem;
+            margin-top: 30px;
+        }
+
+        footer a {
+            color: #ccc;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            color: white;
+        }
+
+        .progress-bar {
+            background-color: #28a745;
+        }
+
+        /* Responsive Tweaks */
+        @media (max-width: 768px) {
+            .col-md-5 {
+                width: 100%;
+                margin-bottom: 20px;
+            }
+
+            .btn-group-vertical {
+                flex-direction: row;
+                justify-content: space-between;
+            }
+
+            h3 {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="page-header">
+    <h3 style="text-align:center;">Online Tools For Developers</h3>
+    <input id="hide" type="hidden"/>
+</div>
+<div class="container-fluid">
+    <div class="row-fluid">
+        <div class="col-md-5">
+            <div class="panel panel-primary">
+                <div class="panel-body">
+                    <textarea id="from" rows="24" class="form-control" placeholder="Src content"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2 btn-group-vertical">
+            <h3 style="text-align:center;color:gray">通 知</h3>
+            <textarea id="notify" rows="16" class="form-control" readonly></textarea>
+            <button class="btn btn-info" style="margin-top: 20px;" type="button" onclick="imgBed()">上传图片</button>
+            <button class="btn btn-primary" style="margin-top: 15px;" type="button" value="add">&gt;&gt;To 生成短网址</button>
+
+</div>
+<footer>
+    <div class="row">
+        <div class="col-md-12">
+            <div>京ICP备18020480号-1</div>
+            <div>&copy; 2018, TOYAML.COM, All Rights Reserved</div>
+            <div>E-Mail: <code>1712066621@qq.com</code></div>
+        </div>
+    </div>
+</footer>
+<script src="static/onLineTools.js"></script>
+</body>
+</html>
