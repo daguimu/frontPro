@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微信支付测试</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #07c160 0%, #08a750 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #07c160 0%, #06ae56 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .header .back-button {
+            position: absolute;
+            left: 30px;
+            top: 35px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .header .back-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* 应用选择页面 */
+        .app-selection {
+            padding: 30px;
+        }
+
+        .app-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .app-card {
+            background: #f7f8fa;
+            border-radius: 12px;
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            text-align: center;
+        }
+
+        .app-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .app-icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #07c160 0%, #06ae56 100%);
+            border-radius: 12px;
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: white;
+        }
+
+        .app-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #262626;
+            margin-bottom: 8px;
+        }
+
+        .app-id {
+            font-size: 12px;
+            color: #8c8c8c;
+            font-family: 'Courier New', monospace;
+        }
+
+        .app-status {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .app-status.active {
+            background: #f6ffed;
+            color: #52c41a;
+        }
+
+        .app-status.inactive {
+            background: #fff7e6;
+            color: #fa8c16;
+        }
+
+        /* 商品列表页面 */
+        .products-section {
+            display: none;
+            padding: 20px;
+        }
+
+        .products-section.show {
+            display: block;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .product-card {
+            background: #f7f8fa;
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .product-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-card.selected {
+            background: #e7f9f0;
+            border-color: #07c160;
+        }
+
+        .product-type-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .type-currency {
+            background: #e6f7ff;
+            color: #1890ff;
+        }
+
+        .type-subscription {
+            background: #f9f0ff;
+            color: #722ed1;
+        }
+
+        .type-non_consumable {
+            background: #fff7e6;
+            color: #fa8c16;
+        }
+
+        .type-multi_currency {
+            background: #e6fffb;
+            color: #13c2c2;
+        }
+
+        .type-callback {
+            background: #fff1f0;
+            color: #f5222d;
+        }
+
+        .product-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #262626;
+            margin-bottom: 8px;
+        }
+
+        .product-desc {
+            font-size: 13px;
+            color: #8c8c8c;
+            margin-bottom: 12px;
+            min-height: 36px;
+        }
+
+        .product-price {
+            font-size: 20px;
+            color: #ff4d4f;
+            font-weight: bold;
+        }
+
+        .product-price span {
+            font-size: 14px;
+            margin-right: 2px;
+        }
+
+        .pay-button {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #07c160 0%, #06ae56 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(7, 193, 96, 0.3);
+            margin-top: 20px;
+        }
+
+        .pay-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(7, 193, 96, 0.4);
+        }
+
+        .pay-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .loading-container {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(7, 193, 96, 0.3);
+            border-radius: 50%;
+            border-top-color: #07c160;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            margin-top: 20px;
+            color: #8c8c8c;
+            font-size: 14px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #8c8c8c;
+        }
+
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        /* 弹窗样式 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal {
+            background: white;
+            border-radius: 16px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            padding: 24px 24px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .qr-title {
+            font-size: 20px;
+            color: #262626;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: #f5f5f5;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            font-size: 20px;
+            color: #8c8c8c;
+        }
+
+        .modal-close:hover {
+            background: #e8e8e8;
+            color: #262626;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .amount-info {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8ebf0 100%);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .amount-label {
+            font-size: 14px;
+            color: #8595a1;
+            margin-bottom: 8px;
+        }
+
+        .amount-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #ff4d4f;
+        }
+
+        .qr-wrapper {
+            text-align: center;
+        }
+
+        .qr-container {
+            display: inline-block;
+            padding: 20px;
+            background: white;
+            border: 3px solid #e8e8e8;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        #qrCode {
+            display: inline-block;
+            line-height: 0;
+        }
+
+        #qrCode img {
+            display: none !important;
+        }
+
+        #qrCode canvas {
+            display: block !important;
+            width: 256px !important;
+            height: 256px !important;
+        }
+
+        .scan-tip {
+            font-size: 16px;
+            color: #07c160;
+            font-weight: 500;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .payment-tips {
+            text-align: center;
+            color: #8c8c8c;
+            font-size: 14px;
+            line-height: 1.8;
+            padding: 15px;
+            background: #fafafa;
+            border-radius: 8px;
+        }
+
+        .payment-status {
+            display: none;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .payment-status.waiting {
+            display: block;
+            background: #fff7e6;
+            color: #fa8c16;
+            border: 1px solid #ffd591;
+        }
+
+        .payment-status.success {
+            display: block;
+            background: #f6ffed;
+            color: #52c41a;
+            border: 1px solid #b7eb8f;
+        }
+
+        .result-section {
+            display: none;
+        }
+
+        .result-section.show {
+            display: block;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            background: #f6ffed;
+            border: 1px solid #b7eb8f;
+            color: #389e0d;
+        }
+
+        .alert-error {
+            background: #fff2f0;
+            border: 1px solid #ffccc7;
+            color: #cf1322;
+        }
+
+        .order-info {
+            background: #fafafa;
+            padding: 16px;
+            border-radius: 8px;
+        }
+
+        .order-info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .order-info-item:last-child {
+            border-bottom: none;
+        }
+
+        .order-info-label {
+            color: #8c8c8c;
+            font-size: 14px;
+        }
+
+        .order-info-value {
+            color: #262626;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .footer {
+            padding: 20px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <button class="back-button" id="backButton" style="display: none;">← 返回</button>
+            <h1 id="pageTitle">微信支付测试</h1>
+            <p id="pageSubtitle">选择应用开始测试</p>
+        </div>
+
+        <!-- 应用选择页面 -->
+        <div class="app-selection" id="appSelectionPage">
+            <div class="loading-container" id="appLoading">
+                <div class="loading"></div>
+                <div class="loading-text">加载应用列表中...</div>
+            </div>
+            <div class="app-list" id="appList"></div>
+            <div class="empty-state" id="appEmpty" style="display: none;">
+                <div class="empty-icon">📦</div>
+                <div>暂无可用应用</div>
+            </div>
+        </div>
+
+        <!-- 商品列表页面 -->
+        <div class="products-section" id="productsPage">
+            <div class="loading-container" id="productsLoading">
+                <div class="loading"></div>
+                <div class="loading-text">加载商品列表中...</div>
+            </div>
+            <div class="product-grid" id="productList"></div>
+            <div class="empty-state" id="productsEmpty" style="display: none;">
+                <div class="empty-icon">🛍️</div>
+                <div>该应用暂无可用商品</div>
+            </div>
+            <button type="button" class="pay-button" id="payButton" style="display: none;">
+                立即支付
+            </button>
+        </div>
+    </div>
+
+    <!-- 支付弹窗 -->
+    <div class="modal-overlay" id="paymentModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="qr-title">请使用微信扫码支付</h2>
+                <button class="modal-close" id="closeModal">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="qr-section" id="qrSection">
+                    <div class="amount-info">
+                        <div class="amount-label">支付金额</div>
+                        <div class="amount-value" id="qrAmount">¥0.00</div>
+                    </div>
+
+                    <div class="scan-tip">使用微信扫一扫</div>
+
+                    <div class="qr-wrapper">
+                        <div class="qr-container" id="qrCode"></div>
+                    </div>
+
+                    <div class="payment-tips">
+                        打开微信扫描二维码完成支付<br>
+                        二维码有效期30分钟，请尽快完成支付
+                    </div>
+
+                    <div class="payment-status waiting" id="paymentWaiting">
+                        正在等待支付...
+                    </div>
+
+                    <div class="payment-status success" id="paymentSuccess" style="display: none;">
+                        支付成功！正在发货...
+                    </div>
+                </div>
+
+                <div class="result-section" id="resultSection">
+                    <div id="resultContent"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        微信Native扫码支付测试 - 应用选择模式
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+
+    <script>
+        // API配置
+        const ADMIN_API_BASE = 'https://pay.dagm.com';  // admin相关请求
+        const API_BASE = 'https://test.dagm.com';         // api相关请求
+
+        // 全局状态
+        let currentApp = null;
+        let selectedProduct = null;
+        let currentOrderId = null;
+        let pollTimer = null;
+        let authToken = null;
+        let qrCodeInstance = null;
+
+        // 页面管理
+        const PageManager = {
+            showAppSelection() {
+                document.getElementById('appSelectionPage').style.display = 'block';
+                document.getElementById('productsPage').classList.remove('show');
+                document.getElementById('backButton').style.display = 'none';
+                document.getElementById('pageTitle').textContent = '微信支付测试';
+                document.getElementById('pageSubtitle').textContent = '选择应用开始测试';
+                currentApp = null;
+                selectedProduct = null;
+            },
+
+            showProducts() {
+                document.getElementById('appSelectionPage').style.display = 'none';
+                document.getElementById('productsPage').classList.add('show');
+                document.getElementById('backButton').style.display = 'block';
+                document.getElementById('pageTitle').textContent = currentApp.appName;
+                document.getElementById('pageSubtitle').textContent = `应用ID: ${currentApp.appId}`;
+            }
+        };
+
+        // HMAC-SHA256 签名
+        async function generateSignature(message, secret) {
+            const encoder = new TextEncoder();
+            const key = await crypto.subtle.importKey(
+                'raw',
+                encoder.encode(secret),
+                { name: 'HMAC', hash: 'SHA-256' },
+                false,
+                ['sign']
+            );
+            const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(message));
+            return Array.from(new Uint8Array(signature))
+                .map(b => b.toString(16).padStart(2, '0'))
+                .join('');
+        }
+
+        // 自动登录
+        async function autoLogin() {
+            console.log('正在自动登录...');
+            try {
+                const response = await fetch(`${ADMIN_API_BASE}/admin/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: 'admin',
+                        password: '123456'
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.code === 0 && result.data && result.data.token) {
+                    authToken = result.data.token;
+                    console.log('自动登录成功！');
+                    localStorage.setItem('authToken', authToken);
+                    localStorage.setItem('tokenExpiry', new Date(Date.now() + result.data.expiresIn).toISOString());
+                    return true;
+                } else {
+                    console.error('登录失败:', result.message);
+                    return false;
+                }
+            } catch (error) {
+                console.error('登录请求失败:', error);
+                return false;
+            }
+        }
+
+        // 检查已保存的token
+        function checkStoredToken() {
+            const storedToken = localStorage.getItem('authToken');
+            const tokenExpiry = localStorage.getItem('tokenExpiry');
+
+            if (storedToken && tokenExpiry) {
+                const expiryDate = new Date(tokenExpiry);
+                if (expiryDate > new Date()) {
+                    authToken = storedToken;
+                    console.log('使用已保存的token');
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // 加载应用列表
+        async function loadApps() {
+            const appLoading = document.getElementById('appLoading');
+            const appList = document.getElementById('appList');
+            const appEmpty = document.getElementById('appEmpty');
+
+            appLoading.style.display = 'block';
+            appList.innerHTML = '';
+            appEmpty.style.display = 'none';
+
+            try {
+                const response = await fetch(`${ADMIN_API_BASE}/admin/apps`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.code === 0 && result.data && result.data.length > 0) {
+                    const apps = result.data.filter(app => app.status === 'active');
+
+                    if (apps.length === 0) {
+                        appEmpty.style.display = 'block';
+                    } else {
+                        apps.forEach(app => {
+                            const appCard = createAppCard(app);
+                            appList.appendChild(appCard);
+                        });
+                    }
+                } else {
+                    appEmpty.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('加载应用列表失败:', error);
+                appEmpty.style.display = 'block';
+                appEmpty.innerHTML = `
+                    <div class="empty-icon">❌</div>
+                    <div>加载失败: ${error.message}</div>
+                `;
+            } finally {
+                appLoading.style.display = 'none';
+            }
+        }
+
+        // 创建应用卡片
+        function createAppCard(app) {
+            const card = document.createElement('div');
+            card.className = 'app-card';
+            card.innerHTML = `
+                <div class="app-icon">${app.appName.charAt(0).toUpperCase()}</div>
+                <div class="app-name">${app.appName}</div>
+                <div class="app-id">${app.appId}</div>
+                <span class="app-status ${app.status}">${app.status === 'active' ? '启用' : '禁用'}</span>
+            `;
+
+            card.addEventListener('click', () => {
+                currentApp = app;
+                loadProducts(app);
+            });
+
+            return card;
+        }
+
+        // 加载商品列表
+        async function loadProducts(app) {
+            PageManager.showProducts();
+
+            const productsLoading = document.getElementById('productsLoading');
+            const productList = document.getElementById('productList');
+            const productsEmpty = document.getElementById('productsEmpty');
+            const payButton = document.getElementById('payButton');
+
+            productsLoading.style.display = 'block';
+            productList.innerHTML = '';
+            productsEmpty.style.display = 'none';
+            payButton.style.display = 'none';
+
+            try {
+                const timestamp = Date.now().toString();
+                const sign = await generateSignature(`${app.appId}${app.apiKey}${timestamp}`, app.apiSecret);
+
+                const response = await fetch(`${API_BASE}/api/v1/products?appId=${app.appId}`, {
+                    headers: {
+                        'X-App-Id': app.appId,
+                        'X-Timestamp': timestamp,
+                        'X-Sign': sign
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.code === 0 && result.data && result.data.length > 0) {
+                    result.data.forEach(product => {
+                        const productCard = createProductCard(product);
+                        productList.appendChild(productCard);
+                    });
+                    payButton.style.display = 'block';
+                } else {
+                    productsEmpty.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('加载商品列表失败:', error);
+                productsEmpty.style.display = 'block';
+                productsEmpty.innerHTML = `
+                    <div class="empty-icon">❌</div>
+                    <div>加载失败: ${error.message}</div>
+                `;
+            } finally {
+                productsLoading.style.display = 'none';
+            }
+        }
+
+        // 创建商品卡片
+        function createProductCard(product) {
+            const card = document.createElement('div');
+            card.className = 'product-card';
+
+            const typeLabel = getProductTypeLabel(product.productType);
+            // price 已经是以元为单位，直接格式化显示
+            const price = product.price ? Number(product.price).toFixed(2) : '未设置';
+            const currency = product.currency || 'CNY';
+            const currencySymbol = currency === 'CNY' ? '¥' : currency === 'USD' ? '$' : currency;
+
+            card.innerHTML = `
+                <div class="product-type-badge type-${product.productType}">${typeLabel}</div>
+                <div class="product-title">${product.productName}</div>
+                <div class="product-desc">${product.description || '暂无描述'}</div>
+                <div class="product-price"><span>${currencySymbol}</span>${price}</div>
+            `;
+
+            card.addEventListener('click', () => {
+                document.querySelectorAll('.product-card').forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
+                selectedProduct = product;
+            });
+
+            return card;
+        }
+
+        // 获取商品类型标签
+        function getProductTypeLabel(type) {
+            const typeMap = {
+                'currency': '虚拟货币',
+                'subscription': '订阅',
+                'non_consumable': '永久道具',
+                'multi_currency': '多货币',
+                'callback': '回调交付'
+            };
+            return typeMap[type] || type;
+        }
+
+        // 支付按钮点击
+        document.getElementById('payButton').addEventListener('click', async function() {
+            if (!selectedProduct) {
+                alert('请先选择商品');
+                return;
+            }
+
+            const userId = 'test_user_' + Date.now();
+            const payButton = this;
+            payButton.disabled = true;
+            payButton.innerHTML = '<span class="loading"></span> 创建订单中...';
+
+            try {
+                const timestamp = Date.now().toString();
+                const sign = await generateSignature(
+                    `${currentApp.appId}${currentApp.apiKey}${timestamp}`,
+                    currentApp.apiSecret
+                );
+
+                const response = await fetch(`${API_BASE}/api/v1/orders`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-App-Id': currentApp.appId,
+                        'X-Timestamp': timestamp,
+                        'X-Sign': sign
+                    },
+                    body: JSON.stringify({
+                        appId: currentApp.appId,
+                        userId: userId,
+                        productId: selectedProduct.productId,
+                        channel: 'wechat_native'
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.code === 0) {
+                    showQRCode(result.data);
+                } else {
+                    alert(`创建订单失败: ${result.message || '未知错误'}`);
+                }
+            } catch (error) {
+                alert(`网络错误: ${error.message}`);
+            } finally {
+                payButton.disabled = false;
+                payButton.innerHTML = '立即支付';
+            }
+        });
+
+        // 显示二维码
+        function showQRCode(orderData) {
+            currentOrderId = orderData.orderId;
+
+            document.getElementById('paymentModal').classList.add('show');
+            document.getElementById('resultSection').classList.remove('show');
+            document.getElementById('qrSection').style.display = 'block';
+            document.getElementById('qrAmount').textContent = `¥${orderData.amount}`;
+
+            const qrCodeUrl = orderData.paymentParams.qrCode;
+            const qrContainer = document.getElementById('qrCode');
+
+            qrContainer.innerHTML = '';
+            if (qrCodeInstance) {
+                qrCodeInstance = null;
+            }
+
+            try {
+                qrCodeInstance = new QRCode(qrContainer, {
+                    text: qrCodeUrl,
+                    width: 256,
+                    height: 256,
+                    colorDark: '#000000',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.L
+                });
+
+                requestAnimationFrame(() => {
+                    const canvas = qrContainer.querySelector('canvas');
+                    if (canvas) {
+                        qrContainer.innerHTML = '';
+                        qrContainer.appendChild(canvas);
+                    }
+                });
+            } catch (error) {
+                console.error('生成二维码失败:', error);
+            }
+
+            document.getElementById('paymentWaiting').style.display = 'block';
+            document.getElementById('paymentSuccess').style.display = 'none';
+
+            startPolling();
+        }
+
+        // 开始轮询订单状态
+        function startPolling() {
+            stopPolling();
+            pollTimer = setInterval(queryOrderStatus, 2000);
+            queryOrderStatus();
+        }
+
+        // 停止轮询
+        function stopPolling() {
+            if (pollTimer) {
+                clearInterval(pollTimer);
+                pollTimer = null;
+            }
+        }
+
+        // 查询订单状态
+        async function queryOrderStatus() {
+            if (!currentOrderId) return;
+
+            try {
+                const timestamp = Date.now().toString();
+                const sign = await generateSignature(
+                    `${currentApp.appId}${currentApp.apiKey}${timestamp}`,
+                    currentApp.apiSecret
+                );
+
+                const response = await fetch(`${API_BASE}/api/v1/orders/${currentOrderId}`, {
+                    headers: {
+                        'X-App-Id': currentApp.appId,
+                        'X-Timestamp': timestamp,
+                        'X-Sign': sign
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.code === 0 && result.data && result.data.orderStatus === 'paid') {
+                    onPaymentSuccess(result.data);
+                }
+            } catch (error) {
+                console.error('查询订单状态失败:', error);
+            }
+        }
+
+        // 支付成功回调
+        function onPaymentSuccess(orderData) {
+            stopPolling();
+
+            document.getElementById('paymentWaiting').style.display = 'none';
+            document.getElementById('paymentSuccess').style.display = 'block';
+
+            setTimeout(() => {
+                showPaymentResult(orderData);
+            }, 2000);
+        }
+
+        // 显示支付结果
+        function showPaymentResult(orderData) {
+            const resultHtml = `
+                <div class="alert alert-success">
+                    <strong>支付成功！</strong><br>
+                    您的订单已完成支付并发货
+                </div>
+                <div class="order-info">
+                    <div class="order-info-item">
+                        <span class="order-info-label">订单号</span>
+                        <span class="order-info-value">${orderData.orderId}</span>
+                    </div>
+                    <div class="order-info-item">
+                        <span class="order-info-label">商品名称</span>
+                        <span class="order-info-value">${selectedProduct.productName}</span>
+                    </div>
+                    <div class="order-info-item">
+                        <span class="order-info-label">支付金额</span>
+                        <span class="order-info-value">¥${orderData.amount}</span>
+                    </div>
+                    <div class="order-info-item">
+                        <span class="order-info-label">订单状态</span>
+                        <span class="order-info-value">${getOrderStatus(orderData.orderStatus)}</span>
+                    </div>
+                    <div class="order-info-item">
+                        <span class="order-info-label">发货状态</span>
+                        <span class="order-info-value">${getDeliveryStatus(orderData.deliveryStatus)}</span>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('resultContent').innerHTML = resultHtml;
+            document.getElementById('resultSection').classList.add('show');
+            document.getElementById('qrSection').style.display = 'none';
+        }
+
+        // 关闭弹窗
+        function closeModal() {
+            document.getElementById('paymentModal').classList.remove('show');
+            stopPolling();
+        }
+
+        document.getElementById('closeModal').addEventListener('click', closeModal);
+        document.getElementById('paymentModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        // 返回按钮
+        document.getElementById('backButton').addEventListener('click', () => {
+            PageManager.showAppSelection();
+        });
+
+        // 获取状态文本
+        function getOrderStatus(status) {
+            const statusMap = {
+                'created': '待支付',
+                'paid': '已支付',
+                'delivered': '已发货',
+                'cancelled': '已取消',
+                'closed': '已关闭'
+            };
+            return statusMap[status] || status;
+        }
+
+        function getDeliveryStatus(status) {
+            const statusMap = {
+                'pending': '待发货',
+                'success': '发货成功',
+                'failed': '发货失败',
+                'not_required': '无需发货'
+            };
+            return statusMap[status] || status;
+        }
+
+        // 页面加载时初始化
+        window.addEventListener('DOMContentLoaded', async function() {
+            console.log('微信Native支付测试页面 - 应用选择模式');
+            console.log('Admin API地址:', ADMIN_API_BASE);
+            console.log('API地址:', API_BASE);
+
+            // 先检查token或自动登录
+            if (!checkStoredToken()) {
+                await autoLogin();
+            }
+
+            console.log('认证状态:', authToken ? '已登录' : '未登录');
+
+            if (authToken) {
+                await loadApps();
+            } else {
+                document.getElementById('appEmpty').style.display = 'block';
+                document.getElementById('appEmpty').innerHTML = `
+                    <div class="empty-icon">🔒</div>
+                    <div>登录失败，请刷新页面重试</div>
+                `;
+                document.getElementById('appLoading').style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
